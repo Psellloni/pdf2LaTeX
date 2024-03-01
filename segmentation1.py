@@ -10,6 +10,7 @@ def crop_x(sp, fp, matrix):
     ans = ''
 
     x_vector = []
+    indent = 20
 
     for i in range(len(matrix[0])):
         sum = 0
@@ -25,30 +26,33 @@ def crop_x(sp, fp, matrix):
   
     flag = True
     c = 0
+    counter2 = 1
 
     for i in range(len(x_vector)):
         if (x_vector[i] == 0) and flag:
             c += 1
         
-        elif (x_vector[i] == 1) and flag and c >= 6:
+        elif (x_vector[i] == 1) and flag and c >= indent:
             c = 0
             sp_x = i
             flag = False
         
-        elif (x_vector[i] == 0) and (not flag) and c < 6:
+        elif (x_vector[i] == 0) and (not flag) and c < indent:
             c += 1
 
-        elif (x_vector[i] == 1) and (not flag) and c < 6:
+        elif (x_vector[i] == 1) and (not flag) and c < indent:
             c = 0
 
-        elif (x_vector[i] == 0) and (not flag) and c >= 6:
-            c = 6
+        elif (x_vector[i] == 0) and (not flag) and c >= indent:
+            c = indent
             flag = True
             fp_x = i - c
 
             img2 = img.crop((sp_x, sp, fp_x, fp))
             img2.show()
             time.sleep(2)
+
+            counter2 += 1
 
             
 def crop_y(matrix, img):
