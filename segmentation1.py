@@ -1,13 +1,13 @@
 import cv2
 import numpy as np
 from PIL import Image
-from pix2tex.cli import LatexOCR
+import easyocr
+import time
 
-def crop_x(sp, fp, matrix, img):
-    model = LatexOCR()
+def crop_x(sp, fp, matrix):
+    img = Image.open('test3.jpg')
+    reader = easyocr.Reader(['en'])
     ans = ''
-    for row in matrix[sp: fp + 1]:
-        print(''.join(list(map(str, row[:200]))), '\n')
 
     x_vector = []
 
@@ -22,11 +22,7 @@ def crop_x(sp, fp, matrix, img):
         
         else:
             x_vector.append(1)
-    print(''.join(list(map(str, x_vector[:200]))))
-
-    print('\n')
-    print('\n')
-    
+  
     flag = True
     c = 0
 
@@ -50,13 +46,10 @@ def crop_x(sp, fp, matrix, img):
             flag = True
             fp_x = i - c
 
-            img2 = img.crop((sp, fp, sp_x, fp_x))
-            try:
-                ans += (str(model(img2)) + ' ')
-            except:
-                ans += ' '
-    
-    print(ans)
+            img2 = img.crop((sp_x, sp, fp_x, fp))
+            img2.show()
+            time.sleep(2)
+
             
 def crop_y(matrix, img):
     y_vector = []
@@ -76,7 +69,7 @@ def crop_y(matrix, img):
             flag = False
 
         elif (y_vector[i] == 0) and (not flag):
-            crop_x(sp, i, matrix, img)
+            crop_x(sp, i, matrix)
             flag = True
 
 
@@ -97,4 +90,4 @@ def preprocessing(path):
     
     crop_y(matrix, img)
 
-preprocessing('test2.jpg')
+preprocessing('test3.jpg')
