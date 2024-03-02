@@ -5,6 +5,7 @@ from model2 import getTex
 from PIL import Image
 import time
 
+
 ''' output for test3.jpg: {\mathcal{Z}}.\mathrm{Consider~a~function~}f(x);
 f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 \left(\mathbf{a}\right)(0.5{\mathrm{~points}}){\mathrm{Define~domain~of~}}f(x)
