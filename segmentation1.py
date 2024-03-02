@@ -14,6 +14,9 @@ f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 
 '''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
 
+source = 'tests/test3.jpg'
+
+
 def crop_x(sp, fp, matrix, img_cv, source):
     img_pil = Image.open(source)
     x_vector = []
@@ -90,23 +93,29 @@ def crop_y(matrix, img, source):
             flag = True
 
 
+
 def preprocessing(path):
+    '''this function transforms image into matrix of zeros and ones'''
+
     img = cv2.imread(path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     matrix = []
+
 
     for index in range(len(img)):
         row = []
 
         for index2 in range(len(img[index])):
+            '''here i count the sum of RGB and if it's higher than 600 (closer to white),
+            I assume that it is white = 0'''
             if sum(img[index][index2]) > 600:
                 row.append(0)
+
             else:
                 row.append(1)
+
         matrix.append(row)
     
     crop_y(matrix, img, source)
 
-
-source = 'tests/test3.jpg'
 preprocessing(source)
