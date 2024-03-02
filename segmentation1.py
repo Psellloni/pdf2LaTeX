@@ -14,14 +14,15 @@ f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 \mathrm{seminar}'''
 
 '''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
-
+counter2 = 1
 
 def crop_x(sp, fp, matrix, img_cv, source):
+    global counter2
     '''this function makes projection of segments we got from crop_y
     fuction and devide it into smaller segments using x-axis'''
     img_pil = Image.open(source)
     x_vector = []
-    indent = 10
+    indent = 20
 
     for i in range(len(matrix[0])):
         sum = 0
@@ -37,15 +38,11 @@ def crop_x(sp, fp, matrix, img_cv, source):
   
     flag = True
     c = 0
-    counter2 = 1
     ans = ''
+    i = 0
 
-    for i in range(len(x_vector)):
-        if (x_vector[i] == 0) and flag:
-            c += 1
-        
-        elif (x_vector[i] == 1) and flag and c >= indent:
-            c = 0
+    while i != len(x_vector):
+        if (x_vector[i] == 1) and flag:
             sp_x = i
             flag = False
         
@@ -55,22 +52,23 @@ def crop_x(sp, fp, matrix, img_cv, source):
         elif (x_vector[i] == 1) and (not flag) and c < indent:
             c = 0
 
-        elif (x_vector[i] == 0) and (not flag) and c >= indent:
-            c = indent
+        elif (not flag) and c >= indent:
+            i -= c
             flag = True
             fp_x = i - c
+            c = 0
 
-            img_cv2 = img_cv[sp:fp, sp_x:fp_x]
-            img_pil2 = img_pil.crop((sp_x, sp, fp_x, fp))
+            img_cv2 = img_cv[sp:(fp + 6), sp_x:(fp_x + 6)]
+            img_pil2 = img_pil.crop((sp_x, sp, (fp_x + 6), (fp + 6)))
             '''img_pil2.show()
             time.sleep(2)'''
             cv2.imwrite(f'output2/seg{counter2}.jpg', img_cv2)
 
             '''here we send smallest segments to character recognition, works goofy'''
-            ans += getTex(img_pil2)
-
             counter2 += 1
-    
+            ans += getTex(img_pil2)
+        i += 1
+
     return ans
 
             
