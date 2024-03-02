@@ -1,16 +1,14 @@
 import cv2
 import numpy as np
+from model2 import process_image
+from model2 import getTex
 from PIL import Image
-import easyocr
 import time
 
-def crop_x(sp, fp, matrix):
-    img = Image.open('test3.jpg')
-    reader = easyocr.Reader(['en'])
-    ans = ''
-
+def crop_x(sp, fp, matrix, img_cv):
+    img_pil = Image.open('tests/test4.png')
     x_vector = []
-    indent = 20
+    indent = 10
 
     for i in range(len(matrix[0])):
         sum = 0
@@ -27,6 +25,7 @@ def crop_x(sp, fp, matrix):
     flag = True
     c = 0
     counter2 = 1
+    ans = ''
 
     for i in range(len(x_vector)):
         if (x_vector[i] == 0) and flag:
@@ -48,11 +47,16 @@ def crop_x(sp, fp, matrix):
             flag = True
             fp_x = i - c
 
-            img2 = img.crop((sp_x, sp, fp_x, fp))
-            img2.show()
+            img_cv2 = img_cv[sp:fp, sp_x:fp_x]
+            img_pil2 = img_pil.crop((sp_x, sp, fp_x, fp))
+            img_pil2.show()
             time.sleep(2)
+            #cv2.imwrite(f'output/seg{counter2}.jpg', img2)
+            ans += getTex(img_pil2)
 
             counter2 += 1
+    
+    print(ans)
 
             
 def crop_y(matrix, img):
@@ -73,7 +77,7 @@ def crop_y(matrix, img):
             flag = False
 
         elif (y_vector[i] == 0) and (not flag):
-            crop_x(sp, i, matrix)
+            crop_x(sp, i, matrix, img)
             flag = True
 
 
@@ -94,4 +98,4 @@ def preprocessing(path):
     
     crop_y(matrix, img)
 
-preprocessing('test3.jpg')
+preprocessing('tests/test4.png')
