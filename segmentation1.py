@@ -14,10 +14,10 @@ f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 
 '''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
 
-source = 'tests/test3.jpg'
-
 
 def crop_x(sp, fp, matrix, img_cv, source):
+    '''this function makes projection of segments we got from crop_y
+    fuction and devide it into smaller segments using x-axis'''
     img_pil = Image.open(source)
     x_vector = []
     indent = 10
@@ -64,16 +64,21 @@ def crop_x(sp, fp, matrix, img_cv, source):
             '''img_pil2.show()
             time.sleep(2)'''
             cv2.imwrite(f'output2/seg{counter2}.jpg', img_cv2)
+
+            '''here we send smallest segments to character recognition, works goofy'''
             ans += getTex(img_pil2)
 
             counter2 += 1
     
-    print(ans)
+    return ans
 
             
 def crop_y(matrix, img, source):
-    '''this function makes a projection of data on y axis. This allow to segment matrix by horizontal lines'''
+    '''this function makes a projection of data on y axis. This allow to segment 
+    matrix by horizontal lines and then each segment goes to function crop_x'''
     y_vector = []
+
+    result = ''
 
     for m in matrix:
         if sum(m) == 0:
@@ -90,15 +95,17 @@ def crop_y(matrix, img, source):
             flag = False
 
         elif (y_vector[i] == 0) and (not flag):
-            crop_x(sp, i, matrix, img, source)
+            result += crop_x(sp, i, matrix, img, source)
             flag = True
+    
+    return result
 
 
 
-def preprocessing(path):
+def preprocessing(source):
     '''this function transforms image into matrix of zeros and ones'''
 
-    img = cv2.imread(path)
+    img = cv2.imread(source)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     matrix = []
 
@@ -117,6 +124,4 @@ def preprocessing(path):
 
         matrix.append(row)
     
-    crop_y(matrix, img, source)
-
-preprocessing(source)
+    return crop_y(matrix, img, source)
