@@ -22,7 +22,7 @@ def crop_x(sp, fp, matrix, img_cv, source):
     fuction and devide it into smaller segments using x-axis'''
     img_pil = Image.open(source)
     x_vector = []
-    indent = 20
+    indent = 30
 
     for i in range(len(matrix[0])):
         sum = 0
@@ -58,16 +58,31 @@ def crop_x(sp, fp, matrix, img_cv, source):
             fp_x = i - c
             c = 0
 
-            img_cv2 = img_cv[sp:(fp + 6), sp_x:(fp_x + 6)]
-            img_pil2 = img_pil.crop((sp_x, sp, (fp_x + 6), (fp + 6)))
-            '''img_pil2.show()
-            time.sleep(2)'''
-            cv2.imwrite(f'output2/seg{counter2}.jpg', img_cv2)
+            img_cv2 = img_cv[sp:fp, sp_x:(fp_x + 60)]
+            img_pil2 = img_pil.crop((sp_x, sp, (fp_x + 60), fp))
+            img_pil2.show()
+            time.sleep(2)
+            cv2.imwrite(f'output/seg{counter2}.jpg', img_cv2)
 
             '''here we send smallest segments to character recognition, works goofy'''
             counter2 += 1
             ans += getTex(img_pil2)
+
         i += 1
+    if (not flag):
+        fp_x = i - c
+
+        img_cv2 = img_cv[sp:fp, sp_x:(fp_x - 1)]
+        img_pil2 = img_pil.crop((sp_x, sp, (fp_x - 1), fp))
+        img_pil2.show()
+        time.sleep(2)
+        cv2.imwrite(f'output/seg{counter2}.jpg', img_cv2)
+
+        counter2 += 1
+
+        '''here we send smallest segments to character recognition, works goofy'''
+        ans += getTex(img_pil2)
+
 
     return ans
 

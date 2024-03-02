@@ -1,4 +1,4 @@
 from segmentation1 import preprocessing
 
-source = 'tests/test3.jpg'
+source = 'tests/test4.png'
 print(preprocessing(source))
