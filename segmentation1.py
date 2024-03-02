@@ -5,8 +5,17 @@ from model2 import getTex
 from PIL import Image
 import time
 
-def crop_x(sp, fp, matrix, img_cv):
-    img_pil = Image.open('tests/test4.png')
+''' output for test3.jpg: {\mathcal{Z}}.\mathrm{Consider~a~function~}f(x);
+f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
+\left(\mathbf{a}\right)(0.5{\mathrm{~points}}){\mathrm{Define~domain~of~}}f(x)
+\mathbf{\tau}(\mathbf{b})(1.5\ \mathrm{points}){\mathrm{Study~its~continuit}})
+\mathrm{Hint}\colon\mathbf{a})\mathbf{f_{\mathrm{or}}}\mathrm{whien}\mathrm{{raines}}\mathrm{Of}\scriptstyle{\mathcal{X}}\operatorname{serics}\scriptstyle{\mathrm{onverges}}\mathbf{b})\scriptstyle{\mathrm{coninuily}}{\mathfrak{q}}:\mathrm{series}.\mathrm{Secec}{\mathrm{problem}}\mathbf{\nabla}2\operatorname{reon}
+\mathrm{seminar}'''
+
+'''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
+
+def crop_x(sp, fp, matrix, img_cv, source):
+    img_pil = Image.open(source)
     x_vector = []
     indent = 10
 
@@ -49,9 +58,9 @@ def crop_x(sp, fp, matrix, img_cv):
 
             img_cv2 = img_cv[sp:fp, sp_x:fp_x]
             img_pil2 = img_pil.crop((sp_x, sp, fp_x, fp))
-            img_pil2.show()
-            time.sleep(2)
-            #cv2.imwrite(f'output/seg{counter2}.jpg', img2)
+            '''img_pil2.show()
+            time.sleep(2)'''
+            cv2.imwrite(f'output2/seg{counter2}.jpg', img_cv2)
             ans += getTex(img_pil2)
 
             counter2 += 1
@@ -59,7 +68,7 @@ def crop_x(sp, fp, matrix, img_cv):
     print(ans)
 
             
-def crop_y(matrix, img):
+def crop_y(matrix, img, source):
     y_vector = []
 
     for m in matrix:
@@ -77,7 +86,7 @@ def crop_y(matrix, img):
             flag = False
 
         elif (y_vector[i] == 0) and (not flag):
-            crop_x(sp, i, matrix, img)
+            crop_x(sp, i, matrix, img, source)
             flag = True
 
 
@@ -96,6 +105,8 @@ def preprocessing(path):
                 row.append(1)
         matrix.append(row)
     
-    crop_y(matrix, img)
+    crop_y(matrix, img, source)
 
-preprocessing('tests/test4.png')
+
+source = 'tests/test3.jpg'
+preprocessing(source)
