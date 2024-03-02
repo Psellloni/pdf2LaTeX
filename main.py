@@ -1,4 +1,4 @@
-from segmentation1 import preprocessing
+from segmentation import preprocessing
 
-source = 'tests/test4.png'
-print(preprocessing(source))
+source = 'tests/test3.jpg'
+print(preprocessing(source, indent=20, output_dir='o4ko/'))

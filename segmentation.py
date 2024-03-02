@@ -3,7 +3,6 @@ import numpy as np
 from model2 import process_image
 from model2 import getTex
 from PIL import Image
-import time
 
 
 ''' output for test3.jpg: {\mathcal{Z}}.\mathrm{Consider~a~function~}f(x);
@@ -14,19 +13,26 @@ f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 \mathrm{seminar}'''
 
 '''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
+counter2 = 1
 
-
-def crop_x(sp, fp, matrix, img_cv, source):
+def crop_x(start_pointer_y, end_pointer_y, matrix, img_cv, source, indent, output_dir):
+    global counter2
     '''this function makes projection of segments we got from crop_y
     fuction and devide it into smaller segments using x-axis'''
+
+
     img_pil = Image.open(source)
     x_vector = []
-    indent = 10
+    flag = True
+    output = ''
+    counter = 0
+    index = 0
 
+    '''This loop create a projection of matrix on axis x'''
     for i in range(len(matrix[0])):
         sum = 0
 
-        for j in range(sp, fp + 1):
+        for j in range(start_pointer_y, end_pointer_y + 1):
             sum += matrix[j][i]
         
         if sum == 0:
@@ -34,47 +40,55 @@ def crop_x(sp, fp, matrix, img_cv, source):
         
         else:
             x_vector.append(1)
-  
-    flag = True
-    c = 0
-    counter2 = 1
-    ans = ''
 
-    for i in range(len(x_vector)):
-        if (x_vector[i] == 0) and flag:
-            c += 1
-        
-        elif (x_vector[i] == 1) and flag and c >= indent:
-            c = 0
-            sp_x = i
+
+    while index < len(x_vector):
+        if (x_vector[index] == 1) and flag:
+            start_pointer_x = index
             flag = False
         
-        elif (x_vector[i] == 0) and (not flag) and c < indent:
-            c += 1
+        elif (not x_vector[index]) and (not flag) and (counter < indent):
+            counter += 1
 
-        elif (x_vector[i] == 1) and (not flag) and c < indent:
-            c = 0
+        elif (x_vector[index]) and (not flag) and (counter < indent):
+            counter = 0
 
-        elif (x_vector[i] == 0) and (not flag) and c >= indent:
-            c = indent
+        elif (not flag) and (counter >= indent):
+            index -= counter
             flag = True
-            fp_x = i - c
+            end_pointer_x = index - counter
+            counter = 0
 
-            img_cv2 = img_cv[sp:fp, sp_x:fp_x]
-            img_pil2 = img_pil.crop((sp_x, sp, fp_x, fp))
-            '''img_pil2.show()
-            time.sleep(2)'''
-            cv2.imwrite(f'output2/seg{counter2}.jpg', img_cv2)
+            img_cv2 = img_cv[start_pointer_y:end_pointer_y, start_pointer_x:(end_pointer_x + 60)]
+            img_pil2 = img_pil.crop((start_pointer_x, start_pointer_y, (end_pointer_x + 60), end_pointer_y))
+
+            '''this part save our segments in a folder'''
+            cv2.imwrite((output_dir + f'seg{counter2}.jpg'), img_cv2)
 
             '''here we send smallest segments to character recognition, works goofy'''
-            ans += getTex(img_pil2)
-
             counter2 += 1
-    
-    return ans
+            output += getTex(img_pil2)
+
+        index += 1
+
+    if (not flag):
+        end_pointer_x = index - counter
+
+        img_cv2 = img_cv[start_pointer_y:end_pointer_y, start_pointer_x:(end_pointer_x - 1)]
+        img_pil2 = img_pil.crop((start_pointer_x, start_pointer_y, (end_pointer_x - 1), end_pointer_y))
+
+        cv2.imwrite((output_dir + f'seg{counter2}.jpg'), img_cv2)
+
+        counter2 += 1
+
+        '''here we send smallest segments to character recognition, works goofy'''
+        output += getTex(img_pil2)
+
+
+    return output
 
             
-def crop_y(matrix, img, source):
+def crop_y(matrix, img, source, indent, output_dir):
     '''this function makes a projection of data on y axis. This allow to segment 
     matrix by horizontal lines and then each segment goes to function crop_x'''
     y_vector = []
@@ -90,20 +104,20 @@ def crop_y(matrix, img, source):
 
     flag = True
     
-    for i in range(len(y_vector)):
-        if (y_vector[i] == 1) and (flag):
-            sp = i - 1
+    for index in range(len(y_vector)):
+        if (y_vector[index]) and (flag):
+            start_pointer_y = index - 1
             flag = False
 
-        elif (y_vector[i] == 0) and (not flag):
-            result += crop_x(sp, i, matrix, img, source)
+        elif (not y_vector[index]) and (not flag):
+            result += crop_x(start_pointer_y, index, matrix, img, source, indent, output_dir)
             flag = True
     
     return result
 
 
 
-def preprocessing(source):
+def preprocessing(source, indent=30, output_dir='output/'):
     '''this function transforms image into matrix of zeros and ones'''
 
     img = cv2.imread(source)
@@ -125,4 +139,4 @@ def preprocessing(source):
 
         matrix.append(row)
     
-    return crop_y(matrix, img, source)
+    return crop_y(matrix, img, source, indent, output_dir)
