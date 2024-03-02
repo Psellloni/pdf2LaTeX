@@ -72,6 +72,7 @@ def crop_x(sp, fp, matrix, img_cv, source):
 
             
 def crop_y(matrix, img, source):
+    '''this function makes a projection of data on y axis. This allow to segment matrix by horizontal lines'''
     y_vector = []
 
     for m in matrix:
