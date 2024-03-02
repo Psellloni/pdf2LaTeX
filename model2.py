@@ -1,4 +1,3 @@
-
 from PIL import Image
 from pix2tex.cli import LatexOCR
 import pytesseract
