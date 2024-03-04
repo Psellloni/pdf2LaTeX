@@ -13,55 +13,44 @@ f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 \mathrm{seminar}'''
 
 '''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
-counter2 = 1
 
 class Segmentation:
+    counter2 = 1
+
     # write crop x using np matrix and make it recursive
-    '''def crop_x(matrix, img_cv, source, indent, output_dir):
-        global counter2
+    def crop_x(self, matrix, img_cv):
 
+        img_pil = Image.open(self.source)
 
-        img_pil = Image.open(source)
-        x_vector = []
         flag = True
         output = ''
         counter = 0
         index = 0
 
-        for i in range(len(matrix[0])):
-            sum = 0
-
-            for j in range(len(matrix)):
-                sum += matrix[j][i]
-            
-            if sum == 0:
-                x_vector.append(0)
-            
-            else:
-                x_vector.append(1)
-
+        sums = np.sum(matrix, axis = 0)
+        x_vector = [int(bool(v)) for v in sums]
+        x_vector = np.array(x_vector)
 
         while index < len(x_vector):
             if (x_vector[index] == 1) and flag:
                 start_pointer_x = index
                 flag = False
             
-            elif (not x_vector[index]) and (not flag) and (counter < indent):
+            elif (not x_vector[index]) and (not flag) and (counter < self.indent):
                 counter += 1
 
-            elif (x_vector[index]) and (not flag) and (counter < indent):
+            elif (x_vector[index]) and (not flag) and (counter < self.indent):
                 counter = 0
 
-            elif (not flag) and (counter >= indent):
+            elif (not flag) and (counter >= self.indent):
                 index -= counter
                 flag = True
-                end_pointer_x = index - counter
                 counter = 0
 
-                img_cv2 = img_cv[:, start_pointer_x:(end_pointer_x + 20)]
+                img_cv2 = img_cv[:, start_pointer_x:index]
                 #img_pil2 = img_pil.crop((start_pointer_x, start_pointer_y, (end_pointer_x + 20), end_pointer_y))
-                cv2.imwrite((output_dir + f'seg{counter2}.jpg'), img_cv2)
-                counter2 += 1
+                cv2.imwrite(('output_x/' + f'seg{self.counter2}.jpg'), img_cv2)
+                self.counter2 += 1
                 #output += process_image(img_pil2, img_cv2)
 
             index += 1
@@ -72,14 +61,14 @@ class Segmentation:
             img_cv2 = img_cv[:, start_pointer_x:(end_pointer_x - 1)]
             #img_pil2 = img_pil.crop((start_pointer_x, start_pointer_y, (end_pointer_x - 1), end_pointer_y))
 
-            cv2.imwrite((output_dir + f'seg{counter2}.jpg'), img_cv2)
+            cv2.imwrite(('output_x/' + f'seg{self.counter2}.jpg'), img_cv2)
 
-            counter2 += 1
+            self.counter2 += 1
 
             #output += process_image(img_pil2, img_cv2)
 
 
-        return output'''
+        return output
 
 
     '''def crop_x_prime(matrix):
@@ -138,11 +127,11 @@ class Segmentation:
 
                 counter2 += 1
 
-                #result += self.crop_x(matrix[start_pointer_y:(index + 1)], img[start_pointer_y:(index + 1)])
+                result += self.crop_x(matrix[start_pointer_y:(index + 1)], img[start_pointer_y:(index + 1)])
                 flag = True
 
         
-        return
+        return result
 
 
     def preprocessing(self, source, indent=30, output_dir='output/'):
