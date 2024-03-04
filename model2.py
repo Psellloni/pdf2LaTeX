@@ -14,11 +14,10 @@ def getTex(img):
 def process_image(img_pil, img_cv):
     textBuffer = ''
     reader = easyocr.Reader(['en'])
-    text_data = reader.readtext(img_cv)  
+    text_data = reader.readtext(img_cv)
 
     for block in text_data:
-        print(block)
-        if block[-1] > 0.65:
+        if block[-1] > 0.5:
             textBuffer += "\\text{ " + block[-2] + " }"
         else:    
             textBuffer += getTex(img_pil)
@@ -26,7 +25,6 @@ def process_image(img_pil, img_cv):
 
 
     return textBuffer
-
 
 
 #print(process_image("test2.jpg"))
