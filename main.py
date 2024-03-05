@@ -1,6 +1,6 @@
 from segmentation import Segmentation
 
-source = 'tests/test3.jpg'
+source = 'tests/test1.png'
 
 seg = Segmentation()
-print(seg.preprocessing(source, indent=30, output_dir='output/'))
+print(seg.preprocessing(source, output_dir='output/'))

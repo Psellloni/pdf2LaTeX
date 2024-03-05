@@ -15,14 +15,18 @@ f(x):\sum_{k=1}^{\infty}\left(x+{\frac{1}{n}}\right)^{n}
 '''output for test4.jpg: \pm\lambda{\frac{2}{x^{3}}}-{\frac{3}{x}};{\mathfrak{h}}{\mathfrak{h}}6x^{2}-4x+3z'''
 
 class Segmentation:
-    counter2 = 1
+    counter_x = 1
+    counter_y = 1
 
     # write crop x using np matrix and make it recursive
     def crop_x(self, matrix, img_cv):
 
         img_pil = Image.open(self.source)
 
+        self.cropped_x = False
+
         flag = True
+        crop_counter = 0
         output = ''
         counter = 0
         index = 0
@@ -32,71 +36,50 @@ class Segmentation:
         x_vector = np.array(x_vector)
 
         while index < len(x_vector):
-            if (x_vector[index] == 1) and flag:
+            if (x_vector[index]) and (flag):
                 start_pointer_x = index
                 flag = False
-            
-            elif (not x_vector[index]) and (not flag) and (counter < self.indent):
-                counter += 1
 
-            elif (x_vector[index]) and (not flag) and (counter < self.indent):
-                counter = 0
-
-            elif (not flag) and (counter >= self.indent):
-                index -= counter
+            elif (not flag) and (counter >= self.indent_x):
                 flag = True
                 counter = 0
-
-                img_cv2 = img_cv[:, start_pointer_x:index]
                 #img_pil2 = img_pil.crop((start_pointer_x, start_pointer_y, (end_pointer_x + 20), end_pointer_y))
-                cv2.imwrite(('output_x/' + f'seg{self.counter2}.jpg'), img_cv2)
-                self.counter2 += 1
+                cv2.imwrite(('output_x/' + f'seg{self.counter_x}.jpg'), img_cv[:, start_pointer_x:index])
+                crop_counter += 1
+                self.counter_x += 1
+                index -= counter
+                self.cropped_x = True
                 #output += process_image(img_pil2, img_cv2)
+
+                if not crop_counter > 2:
+                    self.crop_y(matrix[:, start_pointer_x:index], img_cv[:, start_pointer_x:index])
+
+                        
+            elif (not x_vector[index]) and (not flag):
+                counter += 1
+            
+            elif (x_vector[index]) and (not flag):
+                counter = 0
 
             index += 1
 
-        if (not flag):
-            end_pointer_x = index - counter
+        '''if (not flag):
 
-            img_cv2 = img_cv[:, start_pointer_x:(end_pointer_x - 1)]
+            img_cv2 = img_cv[:, start_pointer_x:(index - counter)]
             #img_pil2 = img_pil.crop((start_pointer_x, start_pointer_y, (end_pointer_x - 1), end_pointer_y))
 
             cv2.imwrite(('output_x/' + f'seg{self.counter2}.jpg'), img_cv2)
 
+            if crop_counter:
+                self.crop_y(matrix[:, start_pointer_x:(index - counter)], img_cv[:, start_pointer_x:(index - counter)])
+
             self.counter2 += 1
 
-            #output += process_image(img_pil2, img_cv2)
+            #output += process_image(img_pil2, img_cv2)'''
 
 
-        return output
 
-
-    '''def crop_x_prime(matrix):
-        x_vector_prime = []
-
-        for i in range(len(matrix[0])):
-            sum = 0
-
-            for j in range(len(matrix)):
-                sum += matrix[j][i]
-
-            if sum == 0:
-                x_vector_prime.append(0)
-            
-            else:
-                x_vector_prime.append(1)
-        
-        flag_cuted = False
-        flag = True
-
-        for i in range(len(x_vector_prime)):
-            if (x_vector_prime[i]) and flag:
-                start_pointer_x_prime = i
-                flag = True
-                flag_cuted = False
-
-            if (not x_vector_prime[i]) and (not flag):
-                crop_y'''
+        return None
 
 
     def crop_y(self, matrix, img):
@@ -106,6 +89,9 @@ class Segmentation:
 
         result = ''
 
+        self.cropped_y = False
+
+        # projection on y axis
         for i in range(len(matrix)):
             if np.sum(matrix[i]):
                 y_vector.append(1)
@@ -116,35 +102,58 @@ class Segmentation:
         y_vector = np.array(y_vector)
         flag = True
         counter2 = 1
+        counter3 = 0
+        crop_counter = 0
+        index = 0
         
-        for index in range(len(y_vector)):
+        while index != len(y_vector):
             if (y_vector[index]) and (flag):
-                start_pointer_y = index - 1
+                start_pointer_y = index
                 flag = False
 
-            elif (not y_vector[index]) and (not flag):
-                cv2.imwrite(f'output_y/seg{counter2}.jpg', img[start_pointer_y:(index + 1), :])
+            elif (not y_vector[index]) and (not flag) and (counter3 >= self.indent_y or (not crop_counter)):
+                cv2.imwrite(f'output_y/seg{self.counter_y}.jpg', img[start_pointer_y:(index + 1), :])
 
-                counter2 += 1
+                self.counter_y += 1
 
-                result += self.crop_x(matrix[start_pointer_y:(index + 1)], img[start_pointer_y:(index + 1)])
+                self.cropped_y = True
+
+                self.crop_x(matrix[start_pointer_y:(index + 1)], img[start_pointer_y:(index + 1)])
+
+                if not crop_counter:
+                    self.crop_x(matrix, img)
+
+                crop_counter += 1
+                index -= counter3
+                counter3 = 0
                 flag = True
 
+            elif (not y_vector[index]) and (not flag):
+                counter3 += 1
+
+            elif (y_vector[index]) and (not flag):
+                counter3 = 0
+
+            index += 1
         
-        return result
+        return None
 
 
-    def preprocessing(self, source, indent=30, output_dir='output/'):
+    def preprocessing(self, source, indent_x=20, indent_y=2, output_dir='output/', *args, **kwargs):
         '''this function transforms image into matrix of zeros and ones'''
+
+        print('это нахуй не нужно', args)
+        print('это тоже', kwargs)
+
         self.source = source
-        self.indent = indent
+        self.indent_x = indent_x
+        self.indent_y = indent_y
         self.output_dir = output_dir
 
         img = cv2.imread(self.source)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         matrix = []
-
 
         for index in range(len(img)):
             row = []
