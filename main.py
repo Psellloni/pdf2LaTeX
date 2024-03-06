@@ -1,6 +1,6 @@
-from segmentation import Segmentation
+from segmentation import ImageSegmentationModel
 
 source = 'tests/test1.png'
 
-seg = Segmentation()
-print(seg.preprocessing(source, output_dir='output/'))
+model = ImageSegmentationModel()
+model.fit(source, indent_x=10, output_dir='output/')

@@ -172,3 +172,136 @@ class Segmentation:
         matrix2 = np.array(matrix)
         
         return self.crop_y(matrix2, img)
+
+
+class ImageSegmentationModel:
+
+    def __init__(self):
+
+        pass
+
+
+    def fit(self, source, indent_x=40, indent_y=2, output_dir='output/', *args, **kwargs):
+
+        self.source = source
+        self.indent_x = indent_x
+        self.indent_y = indent_y
+        self.output_dir = output_dir
+        self.seg_index = 1
+        self.cropped = True
+
+        image = self.read_image(source)
+
+        matrix = self.create_bin_matrix(image)
+
+        self.crop(matrix, image, axis=0)
+
+    
+
+    def read_image(self, source):
+
+        image = cv2.imread(self.source)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        return image
+    
+
+    def create_bin_matrix(self, image):
+
+        matrix = []
+
+        for index in range(len(image)):
+
+            row = []
+
+            for index2 in range(len(image[index])):
+                '''here i count the sum of RGB and if it's higher than 600 (closer to white),
+                I assume that it is white = 0'''
+
+                if sum(image[index][index2]) > 600:
+                    row.append(0)
+
+                else:
+                    row.append(1)
+
+            matrix.append(row)
+        
+        return np.array(matrix)
+    
+
+    def crop(self, matrix, image, axis):
+
+        bin_vector = self.create_vector(matrix, axis=axis)
+
+        print(bin_vector)
+
+        if axis:
+
+            req_indent = self.indent_x
+
+        else:
+
+            req_indent = self.indent_y
+
+        index = 0
+        curr_indent = 0
+        flag_segment = False
+        flag_cropped = False
+
+        while index != len(bin_vector):
+
+            if (bin_vector[index]) and (not flag_segment):
+
+                start_pointer = index
+                flag_segment = True
+
+            elif (not bin_vector[index]) and (flag_segment) and (curr_indent < req_indent):
+
+                curr_indent += 1
+
+            elif (not bin_vector[index]) and (flag_segment) and (curr_indent >= req_indent):
+
+                if axis:
+
+                    cv2.imwrite(self.output_dir + f'seg{self.seg_index}.jpg', image[start_pointer: index])
+
+                    self.seg_index += 1
+
+                    self.crop(matrix[start_pointer: index], image[start_pointer: index], axis=int(not axis))
+                
+                else:
+
+                    cv2.imwrite(self.output_dir + f'seg{self.seg_index}.jpg', image[:, start_pointer: index])
+
+                    self.seg_index += 1
+
+                    self.crop(matrix[:, start_pointer: index], image[:, start_pointer: index], axis=int(not axis))
+
+                index -= (curr_indent + 1)
+                curr_indent = 0
+                flag_segment = False
+                flag_cropped = True
+
+            elif (bin_vector[index]) and (flag_segment):
+                curr_indent = 0
+
+            index += 1
+
+        if (self.cropped) or (flag_cropped):
+
+            self.cropped = flag_cropped
+
+            cv2.imwrite(self.output_dir + f'seg{self.seg_index}.jpg', image)
+
+            self.seg_index += 1
+
+            self.crop(matrix, image, axis=int(not axis))
+
+    
+    def create_vector(self, matrix, axis):
+
+        vector_of_sums = np.sum(matrix, axis=int(not axis))
+
+        bin_vector =  [int(bool(v)) for v in vector_of_sums]
+
+        return np.array(bin_vector)
