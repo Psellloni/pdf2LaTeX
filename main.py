@@ -3,4 +3,6 @@ from segmentation import ImageSegmentationModel
 source = 'tests/test1.png'
 
 model = ImageSegmentationModel()
-model.fit(source, indent_x=10, output_dir='output/')
+prediction = model.predict(source, indent_y=4, indent_x=15,  output_dir='output/')
+
+print(prediction)
