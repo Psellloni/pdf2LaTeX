@@ -1,4 +1,14 @@
-from segmentation import preprocessing
+from BFS_segmentation_class import Segmentation_BFS
+from model2 import process_image
+import cv2
 
-source = 'tests/test3.jpg'
-print(preprocessing(source, indent=20, output_dir='o4ko/'))
+segmentation = Segmentation_BFS()
+
+segments = segmentation.get_segments('tests/test3.jpg')
+
+for seg in segments:
+
+    seg = segmentation.cut_picture(seg)
+
+    cv2.imshow('image', seg)
+    cv2.waitKey(0)

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
 
 
 from PIL import Image
@@ -14,8 +13,6 @@ import matplotlib.pyplot as plt
 import cv2
 from collections import deque
 
-
-# In[2]:
 
 
 class Segmentation_BFS:
@@ -61,7 +58,7 @@ class Segmentation_BFS:
 
    #Итеративно вызывает add_precision() для каждой строки (если ось х) 
    #или каждого столбца (если ось у), тем самым размазывая изображение
-   def blur(img, precision=1, axis='x', show=False):
+   def blur(self, img, precision=1, axis='x', show=False):
 
        t_img = img.copy()
 
@@ -69,7 +66,7 @@ class Segmentation_BFS:
            t_img = t_img.T
 
        for row in t_img:
-           add_precision(row, precision)
+           self.add_precision(row, precision)
 
        if axis != 'x':
            t_img = t_img.T
@@ -81,7 +78,7 @@ class Segmentation_BFS:
 
 
    #Запускает обход в ширину при обнаружении размазни. Вызывается в следующей функции
-   def BFS_segment(blurred, been, coords, show=False):
+   def BFS_segment(self, blurred, been, coords, show=False):
 
        segment = np.zeros_like(blurred)
        segment[coords[0]][coords[1]] = 1
@@ -130,7 +127,7 @@ class Segmentation_BFS:
        return segment
        
    #Ищет размазни, встречая их вызывает обход в ширину (BFS_segment)
-   def segmentation_BFS(blurred):
+   def segmentation_BFS(self, blurred):
        been = np.zeros_like(blurred)
        blurred[blurred != 0] = 1
        segments = []
@@ -139,25 +136,26 @@ class Segmentation_BFS:
                for j in range(len(blurred[i])):
                    if (blurred[i][j] != 0) and (been[i][j] == 0):
                        been[i][j] = 1
-                       segment = BFS_segment(blurred, been, coords=(i, j), show=False)
+                       segment = self.BFS_segment(blurred, been, coords=(i, j), show=False)
                        segments.append(segment)
        return segments
        
        
    #Объединяет предыдущие функции для поиска сегментов
-   def get_segments(image_path, cont_tres=(500, 600), precision=(6, 4)):
-       image = cv2.imread(image_path,  cv2.IMREAD_GRAYSCALE)
-       cont_img = contour(image_path, tres=cont_tres)
-       blurred = blur(cont_img, precision=precision[0], axis='x')
-       blurred = blur(blurred, precision=precision[1], axis='y')
-       segments = segmentation_BFS(blurred)
+   def get_segments(self, image_path, cont_tres=(500, 600), precision=(6, 4)):
+       self.image = cv2.imread(image_path,  cv2.IMREAD_GRAYSCALE)
+       cont_img = self.contour(image_path, tres=cont_tres)
+       blurred = self.blur(cont_img, precision=precision[0], axis='x')
+       blurred = self.blur(blurred, precision=precision[1], axis='y')
+       segments = self.segmentation_BFS(blurred)
+
        return segments
    
    
    '''Методы визуализации и получения изображения'''
    
    #Возвращает кусок изображения принадлежащий сегменту
-   def show_part_of_image(segment, image, show=False):
+   def show_part_of_image(self, segment, image, show=False):
        mask = segment.copy()
        mask[mask != 0] = 1
        mask = mask.astype(bool)
@@ -170,7 +168,7 @@ class Segmentation_BFS:
        return iz
    
    #Возвращает квадрат сегмента и сегмент в нем (в виде маски)
-   def cut_projection(segment, show=False):
+   def cut_projection(self, segment, show=False):
        x_proj = segment.any(axis=0)
        y_proj = segment.any(axis=1)
 
@@ -200,7 +198,7 @@ class Segmentation_BFS:
        return cut_segment
    
    #Возвращает квадрат исходного изображения которому принадлежит сегмент
-   def cut_picture(segment, image, show=False):
+   def cut_picture(self, segment, show=False):
        x_proj = segment.any(axis=0)
        y_proj = segment.any(axis=1)
 
@@ -220,11 +218,7 @@ class Segmentation_BFS:
        x_first = find_first(x_proj)
        x_last = find_last(x_proj) 
 
-       cut_image = image.copy()[y_first:y_last, x_first:x_last]
-
-
-       if show is True:
-           plt.imshow(cut_image, cmap='gray')
+       cut_image = self.image.copy()[y_first:y_last, x_first:x_last]
 
        return cut_image
 
